@@ -1,0 +1,39 @@
+
+/* Main Containers */
+.outer-container {
+  height: 600px;
+  width: 500px;
+  background: #eee;
+  border: 5px solid #ccc;
+}
+.game-window {
+  height: 100%;
+  width: 300px;
+  background: #222;
+  border-right: 3px solid #53f;
+  float: left;
+}
+.status-window {
+  height: 100%;
+  width: 197px;
+  background: #feb;
+  float: right;
+}
+
+
+/* Game Objects */
+.ship {
+  top: 530px;
+  left: 122px;
+  position: relative;
+  display: inline-block;
+}
+.rocket {
+  position: absolute;
+}
+.rocket img {
+  height: 40px;
+}
+.asteroid {
+  position: absolute;
+}

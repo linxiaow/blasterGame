@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Div Blaster</title>
+	<!-- JS -->
+	<script type="text/javascript" src='scripts/jquery.min.js'></script>
+	<script type="text/javascript" src='scripts/page.js'></script>
+
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="style/style.css">
+</head>
+<!-- HTML -->
+<body>
+  <div class='outer-container'>
+    <div class='game-window'>
+      <div id='enterprise' class='ship'>
+        <img class='ship-avatar' src='img/fighter.png' height='50px'/> <!--ship img: src='http://i.stack.imgur.com/rsH6n.png'-->
+      </div>
+    </div>
+
+    <div class='game-over' style="display: none;">
+      <h1>GAME OVER!</h1>
+      <p>(refresh to play again)</p>
+    </div>
+
+    <div class='status-window' style='text-align: center'>
+      <h3>Welcome!</h3>
+      <hr>
+      <br>
+      <p>score:</p>
+      <h1 id='score-box'>0</h1>
+    </div>
+  </div>
+</body>
+
+</html>
