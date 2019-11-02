@@ -39,4 +39,5 @@ Level 2:
 Level 3:
 - in createAsteroid, a fast asteroid aims at the spaceship
 - add dual ship when enter level 3. fade in fade out
+- use a setInterval to smoothen the movement
 

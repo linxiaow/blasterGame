@@ -6,6 +6,9 @@ var asteroidIdx = 1;
 var fastAsteroid = [];
 var shieldIdx = 1;
 
+var isKeyUp = true;
+var curMove = 0;
+
 // Size Constants
 var MAX_ASTEROID_SIZE = 50;
 var MIN_ASTEROID_SIZE = 15;
@@ -59,6 +62,7 @@ var STATE = {
   running: 2
 }
 
+
 /*
 var LEVEL = {
   first: false,
@@ -98,6 +102,7 @@ $(document).ready( function() {
   maxShipPosX = gwhGame.width() - ship.width();
   maxShipPosY = gwhGame.height() - ship.height();
   $(window).keydown(keydownRouter);
+  $(window).keyup(keyupRouter);
   //$(window).keydown(moveShip);
   //$(window).keydown(fireRocket);
   //$(window).keydown(createAsteroid);
@@ -120,8 +125,13 @@ $(document).ready( function() {
   
 });
 
+function keyupRouter(e){
+  isKeyUp = true;
+}
 
 function keydownRouter(e) {
+  e.preventDefault();
+  isKeyUp = false;
   switch (e.which) {
     case KEYS.shift:
       if(state == STATE.running){
@@ -137,7 +147,8 @@ function keydownRouter(e) {
     case KEYS.right:
     case KEYS.up:
     case KEYS.down:
-      moveShip(e.which);
+      curMove = e.which;
+      //moveShip(e.which);
       break;
     case KEYS.L:
       //level up
@@ -219,20 +230,24 @@ function goBack(e){
   asteroidIdx = 1;
   shieldIdx = 1;
   level = 1;
+  maxShipPosX = gwhGame.width() - ship.width();
+  //reset max x
   isDual = false;
   gwhOver.hide();
   gwhSplash.show();
   ship.show();
   gwhAcc.html('0%');
   state = STATE.initial; // go to splash screen
-  LEVEL.first = false;
-  LEVEL.second = false;
-  LEVEL.third = false;
+  //LEVEL.first = false;
+  //LEVEL.second = false;
+  //LEVEL.third = false;
 }
 
 function gameStart(e){
   //TODO: game start
   console.log(parameterOnUpdate.spawn);
+  SHIP_SPEED = 1; //change ship speed
+
   gwhSplash.hide();
   gwhLife.show();
   $('#health div:first').show();
@@ -256,6 +271,15 @@ function gameStart(e){
   clide = setInterval(function() {
     checkCollisions();  // Remove elements if there are collisions
   }, 100);
+
+  //smooth move
+  setInterval(function() {
+    if(!isKeyUp){
+      //still press
+      moveShip(curMove);
+    }
+     // Remove elements if there are collisions
+  }, 1);
 
 }
 
@@ -327,11 +351,17 @@ function setShield(isWear, item){
     //colide with shield
     shield_exist = true;
     gwhShield.show();
+    if(isDual){
+      $('#shield-dual').show();
+    }
   }else if(shield_exist){
     //shield destroy
     //alert("once exist");
     shield_exist = false;
     gwhShield.hide();
+    if(isDual){
+      $('#shield-dual').hide();
+    }
   }else{
     //alert("lose life");
     loseLife();
@@ -344,14 +374,20 @@ function createDual(){
   ship.fadeOut(1000);
   setTimeout(function(){
     ship.css({'top' : '530px', 'left' : '92px'});
-    var shipDual = "<img class='ship-avatar' id='ship-dual' src='img/fighter.png' height='50px'/>  <div id='shield-dual'><img src='img/shield.png' height='65px'/> </div>"
+    var shipDual = "<img class='ship-avatar' id='ship-dual' src='img/fighter.png' height='50px'/> <div id='shield-dual'><img src='img/shield.png' height='65px'/> </div>"
     // Add the rocket to the screen
     ship.append(shipDual);
+    //alert(ship.html());
   }, 1000);
   
   ship.fadeIn(1000);
-
+  //update max x
+  maxShipPosX = gwhGame.width() - ship.width() * 2;
   isDual = true;
+
+  if(shield_exist){
+    $('#shield-dual').show();
+  }
 }
 //END OF TODO
 
@@ -535,11 +571,19 @@ function createAsteroid() {
   if(isFast && level === 3){
     //if is fast and in the third level, move toward the ship
     setInterval(function(){
-      let ship_left = parseInt(ship.css('left'));
-      
-      let ship_top = parseInt(ship.css('top'));
-      let ast_top = parseInt(curAsteroid.css('top'));
-      let ast_left = parseInt(curAsteroid.css('left'));
+
+      var ship_left = parseInt(ship.css('left')) + (parseInt(ship.width()) / 2);
+      var ship_top = parseInt(ship.css('top'));
+      //+ (parseInt($('#ship-primary').height()) / 2);
+      if(isDual){
+        
+        ship_left += parseInt(ship.width()) / 4;
+        //alert("yes");
+        //ship_top += parseInt($('#ship-dual').height()) / 2;
+      }
+
+      let ast_top = parseInt(curAsteroid.css('top')) + astrSize;
+      let ast_left = parseInt(curAsteroid.css('left')) + astrSize;
       if(ast_top > ship_top){
         //asteroid falls under the ship
         curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.sum_speed);
@@ -561,6 +605,10 @@ function createAsteroid() {
       }
 
       if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
+        curAsteroid.hide();
+      }
+
+      if (parseInt(curAsteroid.css('top')) > (gwhGame.height())) {
         curAsteroid.remove();
       }
 
@@ -615,10 +663,16 @@ function createShield(){
   // Make the asteroids fall towards the bottom
   setInterval( function() {
     curShiled.css('top', parseInt(curShiled.css('top'))+ASTEROID_SPEED);
+
     // Check to see if the asteroid has left the game/viewing window
     if (parseInt(curShiled.css('top')) > (gwhGame.height() - curShiled.height())) {
+      curShiled.hide();
+    }
+
+    if (parseInt(curShiled.css('top')) > (gwhGame.height())) {
       curShiled.remove();
     }
+
   }, OBJECT_REFRESH_RATE);
 }
 
