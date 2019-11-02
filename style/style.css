@@ -92,6 +92,18 @@
   display: inline;
 }
 
+#explosion{
+  display: none;
+  position: absolute;
+  left: 4px;
+  top: -7px;
+  height: 50px;
+  /*
+  left: 15px;
+  top: -30px;
+  height: 80px;*/
+}
+
 .ship {
   top: 530px;
   left: 122px;

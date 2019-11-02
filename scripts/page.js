@@ -22,7 +22,7 @@ var SCORE_UNIT = 100;  // scoring is in 100-point units
 var maxShipPosX, maxShipPosY;
 
 // Global Window Handles (gwh__)
-var gwhGame, gwhOver, gwhStatus, gwhScore, gwhAcc, gwhLife, gwhSplash, gwhLevel, gwhShield;
+var gwhGame, gwhOver, gwhStatus, gwhScore, gwhAcc, gwhLife, gwhSplash, gwhLevel, gwhShield, gwhExplode;
 
 // Global Object Handles
 var ship;
@@ -90,6 +90,7 @@ $(document).ready( function() {
   gwhAcc = $('#acc-box');
   gwhLevel= $('#level-up');
   gwhShield = $('#shield_wear');
+  gwhExplode = $('#explosion');
   level = 1;
   rotation = 0;
   hitNum = 0;
@@ -126,12 +127,27 @@ $(document).ready( function() {
 });
 
 function keyupRouter(e){
-  isKeyUp = true;
+  e.preventDefault();
+  
+  switch (e.which) {
+    //case KEYS.shift:
+    //case KEYS.spacebar:
+    case KEYS.left:
+    case KEYS.right:
+    case KEYS.up:
+    case KEYS.down:
+    //case KEYS.L:
+      isKeyUp = true;
+      break;
+    default:
+      console.log("Other Keyup!");
+  }
+  
 }
 
 function keydownRouter(e) {
   e.preventDefault();
-  isKeyUp = false;
+  
   switch (e.which) {
     case KEYS.shift:
       if(state == STATE.running){
@@ -147,6 +163,7 @@ function keydownRouter(e) {
     case KEYS.right:
     case KEYS.up:
     case KEYS.down:
+      isKeyUp = false;
       curMove = e.which;
       //moveShip(e.which);
       break;
@@ -238,6 +255,7 @@ function goBack(e){
   ship.show();
   gwhAcc.html('0%');
   state = STATE.initial; // go to splash screen
+  gwhExplode.css({'left': '4px', 'top' : '-7px', 'height': '50pxs'});
   //LEVEL.first = false;
   //LEVEL.second = false;
   //LEVEL.third = false;
@@ -318,35 +336,58 @@ function updateAcc(){
 function loseLife(){
   //const curLife = parseInt(parameterOnUpdate.life);
   //console.log(parameterOnUpdate.life);
-  
+  gwhExplode.fadeIn(500);
   if(parameterOnUpdate.life <= 1){
     //gameOver
     gwhLife.hide();
-    ship.hide();
+    
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shiled
-    $('#ship-dual').remove();
+    
     $('#shield-dual').remove();
     clearInterval(asteroid_interval);
     clearInterval(clide);
     state = STATE.game_over;
-    gwhOver.show();
+    setTimeout(function(){
+      ship.hide();
+      $('#ship-dual').remove();
+      gwhOver.show();
+    }, 1000);
+    
   }else{
     parameterOnUpdate.life -= 1;
     $('#health div:first').hide();
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
+    clearInterval(asteroid_interval);
+    clearInterval(clide);
+    setTimeout(function(){
+      asteroid_interval = setInterval(function(){
+        createAsteroid();
+      }, 1000/parameterOnUpdate.spawn);
+
+      clide = setInterval(function() {
+        checkCollisions();  // Remove elements if there are collisions
+      }, 100);
+
+    }, 500);
+    
+    
+    //setShield(false, curAsteroid);
+    //setTimeout(function(){
+    //}, 500);
+    
     //clearInterval(asteroid_interval);
   }
-  
-  
+  gwhExplode.fadeOut(500);
 }
 
 function setShield(isWear, item){
   //if isWear = true, wear shield
   //if isWear = false, it is clide with asteroid
   //if not wear, go to lose life
+  // Need to delay for a while
   if(isWear){
     //colide with shield
     shield_exist = true;
@@ -388,7 +429,10 @@ function createDual(){
   if(shield_exist){
     $('#shield-dual').show();
   }
+  //change css for explosion
+  gwhExplode.css({'left': '15px', 'top' : '-30px', 'height': '80px'});
 }
+
 //END OF TODO
 
 
@@ -406,6 +450,8 @@ function checkCollisions() {
       // For each rocket and asteroid, check for collisions
       if (isColliding(curRocket,curAsteroid)) {
         // If a rocket and asteroid collide, destroy both
+        //explosion(curRocket,curAsteroid);
+        
         curRocket.remove();
         curAsteroid.remove();
 
@@ -431,6 +477,7 @@ function checkCollisions() {
 
         // Update the visible score
         gwhScore.html(parseInt($('#score-box').html()) + points);
+        
       }
     });
   });
@@ -456,6 +503,7 @@ function checkCollisions() {
     var curAsteroid = $(this);
     if (isColliding(curAsteroid, ship)) {
       // Remove all game elements
+      // setShield(false, curAsteroid);
       setShield(false, curAsteroid);
     }
   });

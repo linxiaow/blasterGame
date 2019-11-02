@@ -29,6 +29,7 @@ Level 1:
 -gameStart to setAsteroid interval
 -add asteroid rotation in createAstoroid()
 -implement updateAcc to update rate whenever a hit or rocket out of the screen
+-add explosion effect in lose life
 
 Level 2:
 -Add createShield functionality
