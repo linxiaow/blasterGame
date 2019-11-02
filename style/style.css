@@ -35,6 +35,16 @@
   display: none;
 }
 
+#shield-dual{
+  position: absolute;
+  top: -2px;
+  left: 57px;
+  height: 65px;
+  width: 65px;
+  display: none;
+}
+
+
 #level-up{
   display: none;
   background-color: transparent;

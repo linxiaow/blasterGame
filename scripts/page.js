@@ -29,6 +29,7 @@ var rotation;
 var hitNum;
 var shield_exist;
 var M;
+var isDual;
 
 var parameterOnUpdate = {
   //handle on update
@@ -90,6 +91,7 @@ $(document).ready( function() {
   hitNum = 0;
   shield_exist = false;
   M = 10;
+  isDual = false;
   //END OF TODO
 
   // Set global positions
@@ -99,7 +101,7 @@ $(document).ready( function() {
   //$(window).keydown(moveShip);
   //$(window).keydown(fireRocket);
   //$(window).keydown(createAsteroid);
-
+  //$('#ship-dual').hide();
 
   //TODO: register global listeners
   $('#set-panel').click(setPanel);
@@ -262,6 +264,10 @@ function alertLevel(){
     gwhLevel.fadeIn(1000);
     gwhLevel.fadeOut(2000);
   }
+
+  if(level === 3 && isDual === false){
+    createDual();
+  }
 }
 
 function getRandom(ave){
@@ -281,7 +287,7 @@ function updateAcc(){
 
 function loseLife(){
   //const curLife = parseInt(parameterOnUpdate.life);
-  console.log(parameterOnUpdate.life);
+  //console.log(parameterOnUpdate.life);
   
   if(parameterOnUpdate.life <= 1){
     //gameOver
@@ -289,6 +295,9 @@ function loseLife(){
     ship.hide();
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
+    $('.shield').remove(); // remove all the shiled
+    $('ship-dual').remove();
+    $('shild-dual').remove();
     clearInterval(asteroid_interval);
     //clearInterval(checkClide);
     state = STATE.game_over;
@@ -323,6 +332,20 @@ function setShield(isWear, item){
   }
   item.remove();
   
+}
+
+function createDual(){
+  ship.fadeOut(1000);
+  setTimeout(function(){
+    ship.css({'top' : '530px', 'left' : '92px'});
+    var shipDual = "<img class='ship-avatar' id='ship-dual' src='img/fighter.png' height='50px'/>  <div id='shield-dual'><img src='img/shield.png' height='65px'/> </div>"
+    // Add the rocket to the screen
+    ship.append(shipDual);
+  }, 1000);
+  
+  ship.fadeIn(1000);
+
+  isDual = true;
 }
 //END OF TODO
 
@@ -466,21 +489,23 @@ function createAsteroid() {
   **/
   // Pick a random starting position within the game window
   var startingPosition = Math.random() * (gwhGame.width()-astrSize);  // Using 50px as the size of the asteroid (since no instance exists yet)
-  /*
+  
   let asteroid_speed = {
     sum_speed : ASTEROID_SPEED,
     vspeed : 0,
     hspeed : 0
-  }*/
+  }
   // Set the instance-specific properties
   curAsteroid.css('left', startingPosition+"px");
 
   //TODO: make faster asteroid
     //let asteroid_ = ASTEROID_SPEED;
-    let speed = ASTEROID_SPEED;
+    //let speed = ASTEROID_SPEED;
+    let isFast = false;
     if(level >= 2 && asteroidIdx % 3 == 0){
-      speed = ASTEROID_SPEED * 5;
+      asteroid_speed.sum_speed = ASTEROID_SPEED * 5;
       //fastAsteroid is a set of id
+      isFast = true;
       fastAsteroid.push(curAsteroid.attr('id'));
     }
 
@@ -501,14 +526,53 @@ function createAsteroid() {
   }, 100);
   //END of TODO
 
+  if(isFast && level === 3){
+    //if is fast and in the third level, move toward the ship
+    setInterval(function(){
+      let ship_left = parseInt(ship.css('left'));
+      
+      let ship_top = parseInt(ship.css('top'));
+      let ast_top = parseInt(curAsteroid.css('top'));
+      let ast_left = parseInt(curAsteroid.css('left'));
+      if(ast_top > ship_top){
+        //asteroid falls under the ship
+        curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.sum_speed);
+      }else{
+        let distance = Math.sqrt((ship_top - ast_top) * (ship_top - ast_top) + (ship_left - ast_left) * (ship_left - ast_left));
+        let sinVal = (ship_top - ast_top) / distance;
+        //sinVal is always positive
+        let cosVal = (ship_left - ast_left) / distance;
+        //console.log(sinVal);
+        //console.log(cosVal);
+
+        asteroid_speed.hspeed = parseInt(cosVal * asteroid_speed.sum_speed);
+
+        asteroid_speed.vspeed = parseInt(sinVal * asteroid_speed.sum_speed);
+
+        curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.vspeed);
+
+        curAsteroid.css('left', parseInt(curAsteroid.css('left'))+asteroid_speed.hspeed);
+      }
+
+      if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
+        curAsteroid.remove();
+      }
+
+    }, OBJECT_REFRESH_RATE);
+    
+  }else{
+    //else, act as normal
+    setInterval( function() {
+      curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.sum_speed);
+      // Check to see if the asteroid has left the game/viewing window
+      if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
+        curAsteroid.remove();
+      }
+    }, OBJECT_REFRESH_RATE);
+  }
+
   // Make the asteroids fall towards the bottom
-  setInterval( function() {
-    curAsteroid.css('top', parseInt(curAsteroid.css('top'))+speed);
-    // Check to see if the asteroid has left the game/viewing window
-    if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
-      curAsteroid.remove();
-    }
-  }, OBJECT_REFRESH_RATE);
+  
 }
 
 function createShield(){
@@ -557,17 +621,42 @@ function fireRocket() {
   console.log('Firing rocket...');
 
   // NOTE: source - https://www.raspberrypi.org/learning/microbit-game-controller/images/missile.png
+
   var rocketDivStr = "<div id='r-" + rocketIdx + "' class='rocket'><img src='img/rocket.png'/></div>";
   // Add the rocket to the screen
   gwhGame.append(rocketDivStr);
-  // Create and rocket handle based on newest index
   var curRocket = $('#r-'+rocketIdx);
-  rocketIdx++;  // update the index to maintain uniqueness next time
+  rocketIdx++;
+  var rxPos = parseInt(ship.css('left')) + ($('#ship-primary').width()/2);
+
+  if(isDual){
+    // Set vertical position
+    curRocket.css('top', ship.css('top'));
+    // Set horizontal position
+    //var rxPos = parseInt(ship.css('left')) + (ship.width()/2);  // In order to center the rocket, shift by half the div size (recall: origin [0,0] is top-left of div)
+    curRocket.css('left', rxPos+"px");
+
+    // Create movement update handler
+    setInterval( function() {
+      curRocket.css('top', parseInt(curRocket.css('top'))-ROCKET_SPEED);
+      // Check to see if the rocket has left the game/viewing window
+      if (parseInt(curRocket.css('top')) < curRocket.height()) {
+        //curRocket.hide();
+        //problem: 还是有问题
+        updateAcc();
+        curRocket.remove();
+      }
+    }, OBJECT_REFRESH_RATE);
+    
+    curRocket = $('#r-'+rocketIdx);
+    rocketIdx++;
+    rxPos = parseInt(ship.css('left')) + ($('#ship-dual').width()/2) + (ship.width()/2);
+  }
 
   // Set vertical position
   curRocket.css('top', ship.css('top'));
   // Set horizontal position
-  var rxPos = parseInt(ship.css('left')) + (ship.width()/2);  // In order to center the rocket, shift by half the div size (recall: origin [0,0] is top-left of div)
+  //var rxPos = parseInt(ship.css('left')) + (ship.width()/2);  // In order to center the rocket, shift by half the div size (recall: origin [0,0] is top-left of div)
   curRocket.css('left', rxPos+"px");
 
   // Create movement update handler
@@ -581,6 +670,8 @@ function fireRocket() {
       curRocket.remove();
     }
   }, OBJECT_REFRESH_RATE);
+
+  
 }
 
 // Handle ship movement events

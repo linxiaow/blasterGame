@@ -36,3 +36,6 @@ Level 2:
 -Add fastAsteroid to record fast asteroid
 -Add alert level to remind user of current level
 
+Level 3:
+- in createAsteroid, a fast asteroid aims at the spaceship
+
