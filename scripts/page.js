@@ -466,30 +466,32 @@ function createAsteroid() {
   **/
   // Pick a random starting position within the game window
   var startingPosition = Math.random() * (gwhGame.width()-astrSize);  // Using 50px as the size of the asteroid (since no instance exists yet)
-
+  /*
   let asteroid_speed = {
-    sum_speed = ASTEROID_SPEED,
-    vspeed = 0,
-    hspeed = 0
-  }
+    sum_speed : ASTEROID_SPEED,
+    vspeed : 0,
+    hspeed : 0
+  }*/
   // Set the instance-specific properties
   curAsteroid.css('left', startingPosition+"px");
 
   //TODO: make faster asteroid
     //let asteroid_ = ASTEROID_SPEED;
+    let speed = ASTEROID_SPEED;
     if(level >= 2 && asteroidIdx % 3 == 0){
-      asteroid_speed.sum_speed = ASTEROID_SPEED * 5;
+      speed = ASTEROID_SPEED * 5;
       //fastAsteroid is a set of id
       fastAsteroid.push(curAsteroid.attr('id'));
     }
 
     //TODO: give value to vspeed and hspeed
+    /*
     if(level < 3){
       asteroid_speed.vspeed = asteroid_speed.sum_speed;
       asteroid_speed.hspeed = 0;
     }else{
 
-    }
+    }*/
   //END OF TODO 
 
   //TODO: make the asteroid rotate
@@ -501,7 +503,7 @@ function createAsteroid() {
 
   // Make the asteroids fall towards the bottom
   setInterval( function() {
-    curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.vspeed);
+    curAsteroid.css('top', parseInt(curAsteroid.css('top'))+speed);
     // Check to see if the asteroid has left the game/viewing window
     if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
       curAsteroid.remove();
