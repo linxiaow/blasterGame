@@ -3,6 +3,8 @@
 // Counters
 var rocketIdx = 1;
 var asteroidIdx = 1;
+var fastAsteroid = [];
+var shieldIdx = 1;
 
 // Size Constants
 var MAX_ASTEROID_SIZE = 50;
@@ -17,10 +19,24 @@ var SCORE_UNIT = 100;  // scoring is in 100-point units
 var maxShipPosX, maxShipPosY;
 
 // Global Window Handles (gwh__)
-var gwhGame, gwhOver, gwhStatus, gwhScore;
+var gwhGame, gwhOver, gwhStatus, gwhScore, gwhAcc, gwhLife, gwhSplash, gwhLevel, gwhShield;
 
 // Global Object Handles
 var ship;
+var asteroid_interval;
+var level;
+var rotation;
+var hitNum;
+var shield_exist;
+var M;
+
+var parameterOnUpdate = {
+  //handle on update
+  spawn: 1,
+  isMute: true,
+  life: 2,
+  isShield: false
+}
 
 /*
  * This is a handy little container trick: use objects as constants to collect
@@ -32,8 +48,22 @@ var KEYS = {
   right: 39,
   down: 40,
   shift: 16,
-  spacebar: 32
+  spacebar: 32,
+  L: 76
 }
+
+var STATE = {
+  initial: 0,
+  game_over: 1,
+  running: 2
+}
+
+/*
+var LEVEL = {
+  first: false,
+  second: false,
+  third: false
+}*/
 
 
 ////  Functional Code  ////
@@ -48,6 +78,19 @@ $(document).ready( function() {
   gwhStatus = $('.status-window');
   gwhScore = $('#score-box');
   ship = $('#enterprise');  // set the global ship handle
+  gwhLife = $('#health');
+  //TODO: add self-designed global handles:
+  gwhSplash = $('#splash');
+  state = STATE.initial;
+  gwhAcc = $('#acc-box');
+  gwhLevel= $('#level-up');
+  gwhShield = $('#shield_wear');
+  level = 1;
+  rotation = 0;
+  hitNum = 0;
+  shield_exist = false;
+  M = 10;
+  //END OF TODO
 
   // Set global positions
   maxShipPosX = gwhGame.width() - ship.width();
@@ -57,8 +100,21 @@ $(document).ready( function() {
   //$(window).keydown(fireRocket);
   //$(window).keydown(createAsteroid);
 
+
+  //TODO: register global listeners
+  $('#set-panel').click(setPanel);
+  $('#set-box').submit(updatePanel);
+  $('#go-back').click(goBack);
+  $('#game-start').click(gameStart);
+  //ship.hide();
+  //gwhOver.show();
+
+  //END OF TODO
+
+  //check level up
+  
   // Periodically check for collisions (instead of checking every position-update)
-  setInterval( function() {
+  checkClide = setInterval( function() {
     checkCollisions();  // Remove elements if there are collisions
   }, 100);
 });
@@ -67,10 +123,14 @@ $(document).ready( function() {
 function keydownRouter(e) {
   switch (e.which) {
     case KEYS.shift:
-      createAsteroid();
+      if(state == STATE.running){
+        createAsteroid();
+      }
       break;
     case KEYS.spacebar:
-      fireRocket();
+      if(state == STATE.running){
+        fireRocket();
+      }
       break;
     case KEYS.left:
     case KEYS.right:
@@ -78,10 +138,194 @@ function keydownRouter(e) {
     case KEYS.down:
       moveShip(e.which);
       break;
+    case KEYS.L:
+      //level up
+      gwhScore.html(level * 10000);
+      //alertLevel();
+      /*
+      if(level < 3){
+        //let curScore = parseInt(gwhScore.text())
+        //RECHECK: initial 0
+        
+        LEVEL[Object.keys(LEVEL)[level]] = true;
+        level++;
+        const curLevel = level;
+        $('#level').html(curLevel);
+        gwhLevel.fadeIn(1000);
+        gwhLevel.fadeOut(2000);
+        //level += 1;
+      }*/
+      break;
     default:
       console.log("Invalid input!");
   }
 }
+
+//TODO: design functionalities:
+function setPanel(e){
+  //alert($(this).text());
+  if($(this).html() == "Open Setting Panel"){
+    $(this).html("Close Setting Panel");
+    //$('#set-box').css('display', 'block');
+    $('#set-box').show();
+  }else{
+    $(this).html("Open Setting Panel");
+    //$('#set-box').css('display', 'none');
+    $('#set-box').hide();
+  }
+}
+
+function updatePanel(e){
+  //e.preventDefault();
+  //TODO: updatevalue, error?
+  let s = parseFloat($('#spawn').val());
+  if(!s){
+    // if nothing is entered, we should
+    // not update current value
+    s = parameterOnUpdate.spawn;
+  }
+  else if(s < 0.2 || s > 4){
+    //alert user if it is not in the range
+    alert("Averge number of spawned per second should be in the range of [0.2, 4] ");
+    return false; // NOT for sure
+  }
+
+  s_random = getRandom(s);
+  console.log(s_random);
+  parameterOnUpdate.spawn = s_random;
+  if ($('#audio').is(":checked")){
+    parameterOnUpdate.isMute = true;
+  }else{
+    parameterOnUpdate.isMute = false;
+  }
+  //alert(parameterOnUpdate.isMute);
+  $(this).hide();
+}
+
+function goBack(e){
+  //TODO: 
+  //reinitialize ship and its position
+  //reintiilize score
+  //reintilize accuracy
+  //?: disable click other thing?
+  ship.css({'top': '530px', 'left': '122px'});
+  gwhScore.html(0);
+  //alert(gwhAcc.html());
+  hitNum = 0;
+  rocketIdx = 1;
+  asteroidIdx = 1;
+  shieldIdx = 1;
+  gwhOver.hide();
+  gwhSplash.show();
+  ship.show();
+  gwhAcc.html('0%');
+  state = STATE.initial; // go to splash screen
+  LEVEL.first = false;
+  LEVEL.second = false;
+  LEVEL.third = false;
+}
+
+function gameStart(e){
+  //TODO: game start
+  gwhSplash.hide();
+  gwhLife.show();
+  $('#health div:first').show();
+ 
+  level = 1;
+  parameterOnUpdate.life = 2;
+  state = STATE.running;
+  asteroid_interval = 
+  setInterval(function(){
+    createAsteroid();
+  }, 1000/parameterOnUpdate.spawn);
+  
+
+  $('#level').html(1);
+  gwhLevel.fadeIn(1000);
+  gwhLevel.fadeOut(2000);
+  //LEVEL.first = true;
+
+  levelCheck = setInterval(function(){
+    alertLevel();
+  }, 100);
+
+}
+
+function alertLevel(){
+  if((gwhScore.html() >= level * 10000) && (level < 3)){
+    //alert("enter");
+    //LEVEL[Object.keys(LEVEL)[level]] = true;
+    //alert("here");
+    level++;
+    const curLevel = level;
+    $('#level').html(curLevel);
+    gwhLevel.fadeIn(1000);
+    gwhLevel.fadeOut(2000);
+  }
+}
+
+function getRandom(ave){
+  //get a random number
+  min = ave - ave * 0.5;
+  return Math.random() * ave + min;
+}
+
+function updateAcc(){
+  //everytime a hit 
+  //or a rocket go out of the screen
+  //update accuracy
+  let accuracy = parseInt(hitNum * 100 / (rocketIdx - 1));
+  //update css
+  gwhAcc.html(accuracy + '%');
+}
+
+function loseLife(){
+  //const curLife = parseInt(parameterOnUpdate.life);
+  console.log(parameterOnUpdate.life);
+  
+  if(parameterOnUpdate.life <= 1){
+    //gameOver
+    gwhLife.hide();
+    ship.hide();
+    $('.rocket').remove();  // remove all rockets
+    $('.asteroid').remove();  // remove all asteroids
+    clearInterval(asteroid_interval);
+    //clearInterval(checkClide);
+    state = STATE.game_over;
+    gwhOver.show();
+  }else{
+    parameterOnUpdate.life -= 1;
+    $('#health div:first').hide();
+    $('.rocket').remove();  // remove all rockets
+    $('.asteroid').remove();  // remove all asteroids
+    //clearInterval(asteroid_interval);
+  }
+  
+  
+}
+
+function setShield(isWear, item){
+  //if isWear = true, wear shield
+  //if isWear = false, it is clide with asteroid
+  //if not wear, go to lose life
+  if(isWear){
+    //colide with shield
+    shield_exist = true;
+    gwhShield.show();
+  }else if(shield_exist){
+    //shield destroy
+    //alert("once exist");
+    shield_exist = false;
+    gwhShield.hide();
+  }else{
+    //alert("lose life");
+    loseLife();
+  }
+  item.remove();
+  
+}
+//END OF TODO
+
 
 // Check for any collisions and remove the appropriate object if needed
 function checkCollisions() {
@@ -100,10 +344,43 @@ function checkCollisions() {
         curRocket.remove();
         curAsteroid.remove();
 
+        //TODO: update hitNum
+        hitNum++;
+        
+        //create shiled
+        if(level >= 2){
+          if (hitNum % M === 0){
+            //alert("createShild!")
+            createShield();
+          }
+        }
+        //END
+        updateAcc();
         // Score points for hitting an asteroid! Smaller asteroid --> higher score
         var points = Math.ceil(MAX_ASTEROID_SIZE-curAsteroid.width()) * SCORE_UNIT;
+
+        if (fastAsteroid.indexOf(curAsteroid.attr('id')) > -1) {
+          //faster asteroid get higher score
+          points = points * 2;
+        }
+
         // Update the visible score
         gwhScore.html(parseInt($('#score-box').html()) + points);
+      }
+    });
+  });
+
+
+  $('.rocket').each( function() {
+    var curRocket = $(this);  // define a local handle for this rocket
+    $('.shield').each( function() {
+      var curShield = $(this);  // define a local handle for this asteroid
+
+      // For each rocket and asteroid, check for collisions
+      if (isColliding(curRocket,curShield)) {
+        // If a rocket and asteroid collide, destroy both
+        curRocket.remove();
+        curShield.remove();
       }
     });
   });
@@ -114,16 +391,17 @@ function checkCollisions() {
     var curAsteroid = $(this);
     if (isColliding(curAsteroid, ship)) {
       // Remove all game elements
-      ship.remove();
-      $('.rocket').remove();  // remove all rockets
-      $('.asteroid').remove();  // remove all asteroids
+      setShield(false, curAsteroid);
+    }
+  });
 
-      // Hide primary windows
-      gwhGame.hide();
-      gwhStatus.hide();
-
-      // Show "Game Over" screen
-      gwhOver.show();
+  // Next, check for shield-ship interactions
+  $('.shield').each( function() {
+    var curShield = $(this);
+    if (isColliding(curShield, ship)) {
+      // Remove all game elements
+      setShield(true, curShield);
+      //curShield.remove();
     }
   });
 }
@@ -189,15 +467,85 @@ function createAsteroid() {
   // Pick a random starting position within the game window
   var startingPosition = Math.random() * (gwhGame.width()-astrSize);  // Using 50px as the size of the asteroid (since no instance exists yet)
 
+  let asteroid_speed = {
+    sum_speed = ASTEROID_SPEED,
+    vspeed = 0,
+    hspeed = 0
+  }
   // Set the instance-specific properties
   curAsteroid.css('left', startingPosition+"px");
 
+  //TODO: make faster asteroid
+    //let asteroid_ = ASTEROID_SPEED;
+    if(level >= 2 && asteroidIdx % 3 == 0){
+      asteroid_speed.sum_speed = ASTEROID_SPEED * 5;
+      //fastAsteroid is a set of id
+      fastAsteroid.push(curAsteroid.attr('id'));
+    }
+
+    //TODO: give value to vspeed and hspeed
+    if(level < 3){
+      asteroid_speed.vspeed = asteroid_speed.sum_speed;
+      asteroid_speed.hspeed = 0;
+    }else{
+
+    }
+  //END OF TODO 
+
+  //TODO: make the asteroid rotate
+  setInterval(function(){
+    curAsteroid.css('transform', 'rotate(' + rotation + 'deg)');
+    rotation += 10;
+  }, 100);
+  //END of TODO
+
   // Make the asteroids fall towards the bottom
   setInterval( function() {
-    curAsteroid.css('top', parseInt(curAsteroid.css('top'))+ASTEROID_SPEED);
+    curAsteroid.css('top', parseInt(curAsteroid.css('top'))+asteroid_speed.vspeed);
     // Check to see if the asteroid has left the game/viewing window
     if (parseInt(curAsteroid.css('top')) > (gwhGame.height() - curAsteroid.height())) {
       curAsteroid.remove();
+    }
+  }, OBJECT_REFRESH_RATE);
+}
+
+function createShield(){
+  console.log('Shield asteroid...');
+
+  var shieldDivStr = "<div id='s-" + shieldIdx + "' class='shield'></div>"
+  // Add the rocket to the screen
+  gwhGame.append(shieldDivStr);
+  // Create and asteroid handle based on newest index
+  var curShiled = $('#s-'+shieldIdx);
+
+  shieldIdx++;  // update the index to maintain uniqueness next time
+
+  // Set size of the asteroid (semi-randomized)
+  curShiled.append("<img src='img/shield.png'/>")
+
+  /* NOTE: This position calculation has been moved lower since verD -- this
+  **       allows us to adjust position more appropriately.
+  **/
+  // Pick a random starting position within the game window
+  console.log(curShiled.width());
+  var startingPosition = Math.random() * (gwhGame.width()-curShiled.width());  // Using 50px as the size of the asteroid (since no instance exists yet)
+
+  // Set the instance-specific properties
+  curShiled.css('left', startingPosition+"px");
+
+  //TODO: make the asteroid rotate
+  setInterval(function(){
+    curShiled.css('transform', 'rotate(' + rotation + 'deg)');
+    rotation += 10;
+  }, 100);
+  //END of TODO
+
+  // Make the asteroids fall towards the bottom
+  setInterval( function() {
+    curShiled.css('top', parseInt(curShiled.css('top'))+ASTEROID_SPEED);
+    // Check to see if the asteroid has left the game/viewing window
+    if (parseInt(curShiled.css('top')) > (gwhGame.height() - curShiled.height())) {
+      curShiled.remove();
     }
   }, OBJECT_REFRESH_RATE);
 }
@@ -226,6 +574,8 @@ function fireRocket() {
     // Check to see if the rocket has left the game/viewing window
     if (parseInt(curRocket.css('top')) < curRocket.height()) {
       //curRocket.hide();
+      //problem: 还是有问题
+      updateAcc();
       curRocket.remove();
     }
   }, OBJECT_REFRESH_RATE);

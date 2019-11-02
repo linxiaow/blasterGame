@@ -20,8 +20,68 @@
   float: right;
 }
 
+.shield{
+  position: absolute;
+  height: 65px;
+  width: 65px;
+}
+
+#shield_wear{
+  position: absolute;
+  top: -2px;
+  left: -3px;
+  height: 65px;
+  width: 65px;
+  display: none;
+}
+
+#level-up{
+  display: none;
+  background-color: transparent;
+  text-align: center;
+  color: white;
+  position: absolute;
+  margin-top: 150px;
+  margin-left: 60px;
+}
+
+#splash {
+  background-color: transparent;
+  text-align: center;
+  color: white;
+  position: absolute;
+  margin-top: 50px;
+  margin-left: 15px;
+}
+
+#set-box {
+  display: none;
+}
 
 /* Game Objects */
+#health{
+  position: relative;
+  margin-top: 5px;
+  margin-right: 10px;
+  left: 255px;
+  display: none;
+  right: 0;
+  top: 0;
+}
+
+#heart-1{
+  background-color: transparent;
+  position: absolute;
+  display: inline;
+}
+
+#heart-2{
+  background-color: transparent;
+  position: absolute;
+  left: 23px;
+  display: inline;
+}
+
 .ship {
   top: 530px;
   left: 122px;
@@ -36,4 +96,12 @@
 }
 .asteroid {
   position: absolute;
+}
+
+.game-over{
+  position: absolute;
+  background-color: transparent;
+  margin-left: 50px;
+  text-align: center;
+  color: white;
 }

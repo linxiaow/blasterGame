@@ -14,14 +14,44 @@
 <body>
   <div class='outer-container'>
     <div class='game-window'>
+      <div id='health'>
+        <div id='heart-1'>
+          <img src='img/heart.png' height='20px'/> <!--heart img: src='https://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d'-->
+        </div>
+        <div id='heart-2'>
+          <img src='img/heart.png' height='20px'/> <!--ship img: src='http://i.stack.imgur.com/rsH6n.png'-->
+        </div>        
+      </div>
+
+      <div id='splash'>
+        <h1>Blaster Game</h1>
+        <h3>Created by Linxiao Wu</h3>
+        <br><br>
+        <p>Space: Fire a Rocket</p>
+        <p>Arrow Key(← ↑ → ↓): Move the ship</p>
+        <br>
+        <button id='game-start'>Start Blaster Game</button>
+      </div>
+
+      <div id='level-up'>
+        <h1>Enter Level</h1>
+        <h1 id="level">1</h1>
+      </div>
+
       <div id='enterprise' class='ship'>
         <img class='ship-avatar' src='img/fighter.png' height='50px'/> <!--ship img: src='http://i.stack.imgur.com/rsH6n.png'-->
+        <div id='shield_wear'>
+          <img src='img/shield.png' height='65px'/>
+        </div>
+        
       </div>
-    </div>
 
-    <div class='game-over' style="display: none;">
-      <h1>GAME OVER!</h1>
-      <p>(refresh to play again)</p>
+      <div class='game-over' style="display: none;">
+        <h1>GAME OVER!</h1>
+        <h3 id='final-score'>Your Score is: 0 points</h3>
+        <br><br>
+        <button id='go-back'>Go Back</button>
+      </div>
     </div>
 
     <div class='status-window' style='text-align: center'>
@@ -30,6 +60,21 @@
       <br>
       <p>score:</p>
       <h1 id='score-box'>0</h1>
+      <br>
+      <p>rate:</p>
+      <h1 id='acc-box'>0%</h1>
+      <button id='set-panel'>Open Setting Panel</button>
+      <form id='set-box'>
+        <p>Asteroid Spawning Rate<br>
+          (# of asteroid per second)
+          <br>
+        <input id='spawn' type='text' name='spawn' value=1 placeholder="Min: 0.8 Max: 4">
+        <br>
+        Mute Audio
+        <input id='audio' type="checkbox" name="sound" checked>
+        <br>
+        <input type='submit' value='UPDATE'>
+      </form>
     </div>
   </div>
 </body>
