@@ -116,9 +116,8 @@ $(document).ready( function() {
   //check level up
   
   // Periodically check for collisions (instead of checking every position-update)
-  checkClide = setInterval( function() {
-    checkCollisions();  // Remove elements if there are collisions
-  }, 100);
+  //console.log(parameterOnUpdate.spawn);
+  
 });
 
 
@@ -178,7 +177,7 @@ function setPanel(e){
 }
 
 function updatePanel(e){
-  //e.preventDefault();
+  e.preventDefault();
   //TODO: updatevalue, error?
   let s = parseFloat($('#spawn').val());
   if(!s){
@@ -192,8 +191,9 @@ function updatePanel(e){
     return false; // NOT for sure
   }
 
+  //alert(typeof s);
   s_random = getRandom(s);
-  console.log(s_random);
+  //console.log(s_random);
   parameterOnUpdate.spawn = s_random;
   if ($('#audio').is(":checked")){
     parameterOnUpdate.isMute = true;
@@ -201,6 +201,7 @@ function updatePanel(e){
     parameterOnUpdate.isMute = false;
   }
   //alert(parameterOnUpdate.isMute);
+  $('#set-panel').html("Open Setting Panel");
   $(this).hide();
 }
 
@@ -217,6 +218,7 @@ function goBack(e){
   rocketIdx = 1;
   asteroidIdx = 1;
   shieldIdx = 1;
+  level = 1;
   isDual = false;
   gwhOver.hide();
   gwhSplash.show();
@@ -230,11 +232,10 @@ function goBack(e){
 
 function gameStart(e){
   //TODO: game start
+  console.log(parameterOnUpdate.spawn);
   gwhSplash.hide();
   gwhLife.show();
   $('#health div:first').show();
- 
-  level = 1;
   parameterOnUpdate.life = 2;
   state = STATE.running;
   asteroid_interval = 
@@ -250,6 +251,10 @@ function gameStart(e){
 
   levelCheck = setInterval(function(){
     alertLevel();
+  }, 100);
+
+  clide = setInterval(function() {
+    checkCollisions();  // Remove elements if there are collisions
   }, 100);
 
 }
@@ -298,9 +303,9 @@ function loseLife(){
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shiled
     $('#ship-dual').remove();
-    $('#shild-dual').remove();
+    $('#shield-dual').remove();
     clearInterval(asteroid_interval);
-    //clearInterval(checkClide);
+    clearInterval(clide);
     state = STATE.game_over;
     gwhOver.show();
   }else{
