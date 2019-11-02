@@ -217,6 +217,7 @@ function goBack(e){
   rocketIdx = 1;
   asteroidIdx = 1;
   shieldIdx = 1;
+  isDual = false;
   gwhOver.hide();
   gwhSplash.show();
   ship.show();
@@ -296,8 +297,8 @@ function loseLife(){
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shiled
-    $('ship-dual').remove();
-    $('shild-dual').remove();
+    $('#ship-dual').remove();
+    $('#shild-dual').remove();
     clearInterval(asteroid_interval);
     //clearInterval(checkClide);
     state = STATE.game_over;
@@ -625,53 +626,52 @@ function fireRocket() {
   var rocketDivStr = "<div id='r-" + rocketIdx + "' class='rocket'><img src='img/rocket.png'/></div>";
   // Add the rocket to the screen
   gwhGame.append(rocketDivStr);
-  var curRocket = $('#r-'+rocketIdx);
+  var curRocket_1 = $('#r-'+rocketIdx);
   rocketIdx++;
-  var rxPos = parseInt(ship.css('left')) + ($('#ship-primary').width()/2);
 
-  if(isDual){
-    // Set vertical position
-    curRocket.css('top', ship.css('top'));
-    // Set horizontal position
-    //var rxPos = parseInt(ship.css('left')) + (ship.width()/2);  // In order to center the rocket, shift by half the div size (recall: origin [0,0] is top-left of div)
-    curRocket.css('left', rxPos+"px");
+  var rxPos_1 = parseInt(ship.css('left')) + ($('#ship-primary').width()/2) + 3;
 
-    // Create movement update handler
-    setInterval( function() {
-      curRocket.css('top', parseInt(curRocket.css('top'))-ROCKET_SPEED);
-      // Check to see if the rocket has left the game/viewing window
-      if (parseInt(curRocket.css('top')) < curRocket.height()) {
-        //curRocket.hide();
-        //problem: 还是有问题
-        updateAcc();
-        curRocket.remove();
-      }
-    }, OBJECT_REFRESH_RATE);
-    
-    curRocket = $('#r-'+rocketIdx);
-    rocketIdx++;
-    rxPos = parseInt(ship.css('left')) + ($('#ship-dual').width()/2) + (ship.width()/2);
-  }
-
-  // Set vertical position
-  curRocket.css('top', ship.css('top'));
-  // Set horizontal position
-  //var rxPos = parseInt(ship.css('left')) + (ship.width()/2);  // In order to center the rocket, shift by half the div size (recall: origin [0,0] is top-left of div)
-  curRocket.css('left', rxPos+"px");
+  curRocket_1.css('top', ship.css('top'));
+  curRocket_1.css('left', rxPos_1+"px");
 
   // Create movement update handler
   setInterval( function() {
-    curRocket.css('top', parseInt(curRocket.css('top'))-ROCKET_SPEED);
+    curRocket_1.css('top', parseInt(curRocket_1.css('top'))-ROCKET_SPEED);
     // Check to see if the rocket has left the game/viewing window
-    if (parseInt(curRocket.css('top')) < curRocket.height()) {
+    if (parseInt(curRocket_1.css('top')) < curRocket_1.height()) {
       //curRocket.hide();
       //problem: 还是有问题
       updateAcc();
-      curRocket.remove();
+      curRocket_1.remove();
     }
   }, OBJECT_REFRESH_RATE);
 
+
+  if(isDual){
+    rocketDivStr = "<div id='r-" + rocketIdx + "' class='rocket'><img src='img/rocket.png'/></div>";
+    // Add the rocket to the screen
+    gwhGame.append(rocketDivStr);
+    var curRocket_2 = $('#r-'+rocketIdx);
+    rocketIdx++;
   
+    var rxPos_2 = parseInt(ship.css('left')) + (ship.width()/2) + ($('#ship-dual').width()/2 ) + 5;
+  
+    curRocket_2.css('top', ship.css('top'));
+    curRocket_2.css('left', rxPos_2+"px");
+  
+    // Create movement update handler
+    setInterval( function() {
+      curRocket_2.css('top', parseInt(curRocket_2.css('top'))-ROCKET_SPEED);
+      // Check to see if the rocket has left the game/viewing window
+      if (parseInt(curRocket_2.css('top')) < curRocket_2.height()) {
+        //curRocket.hide();
+        //problem: 还是有问题
+        updateAcc();
+        curRocket_2.remove();
+      }
+    }, OBJECT_REFRESH_RATE);
+    
+  }
 }
 
 // Handle ship movement events
