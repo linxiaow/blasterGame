@@ -4,7 +4,10 @@
 var rocketIdx = 1;
 var asteroidIdx = 1;
 var fastAsteroid = [];
+var astIntervals = [];
 var shieldIdx = 1;
+var isTransition = false;
+//record if it is in transition
 
 /*var isKeyUp = true;*/
 
@@ -273,6 +276,7 @@ function updatePanel(e){
   }else{
     if(state === STATE.initial){
       //if it is initial, should play immediatele
+      //alert("intro");
       introMusic.play();
     }else if(state === STATE.running){
       backMusic.play();
@@ -330,15 +334,18 @@ function gameStart(e){
   state = STATE.running;
   
   $('#level').html(1);
+  isTransition = true;
   gwhLevel.fadeIn(1500);
   setTimeout(function(){
     //console.log("shoot");
     asteroid_interval = 
     setInterval(function(){
-      //console.log("asteroid2");
+      console.log("asteroid2");
       createAsteroid();
     }, 1000/parameterOnUpdate.spawn);
-  }, 1500);
+    isTransition = false;
+  }, 3000);
+  astIntervals.push(asteroid_interval);
   gwhLevel.fadeOut(1500);
   //LEVEL.first = true;
 
@@ -348,7 +355,7 @@ function gameStart(e){
 
   clide = setInterval(function() {
     checkCollisions();  // Remove elements if there are collisions
-  }, 50);
+  }, 10);
 
   //smooth move
   
@@ -356,10 +363,11 @@ function gameStart(e){
 }
 
 function alertLevel(){
-  if((gwhScore.html() >= level * 10000) && (level < 3)){
+  if((gwhScore.html() >= level * 10000) && (level < 3) && !isTransition){
     //alert("enter");
     //LEVEL[Object.keys(LEVEL)[level]] = true;
     //alert("here");
+    isTransition = true;
     if(!parameterOnUpdate.isMute){
       if(!transMusic.paused){
         transMusic.pause();
@@ -368,20 +376,34 @@ function alertLevel(){
     }
     level++;
     //alert(level);
+    //astIntervals.forEach(function(a){
+    // clearInterval(a);
+    //});
+    
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shiled
+    clearInterval(asteroid_interval);
+    clearInterval(clide);
     const curLevel = level;
     $('#level').html(curLevel);
+
+  
+    //cannot do transition too often
+    
     gwhLevel.fadeIn(1500);
-    clearInterval(asteroid_interval);
     setTimeout(function(){
       asteroid_interval = 
       setInterval(function(){
           console.log("asteroid");
           createAsteroid();
         }, 1000/parameterOnUpdate.spawn);
-    }, 1500);
+      astIntervals.push(asteroid_interval);
+      clide = setInterval(function() {
+        checkCollisions();  // Remove elements if there are collisions
+      }, 10);
+      isTransition = false;
+    }, 3000);
     gwhLevel.fadeOut(1500);
   }
 
@@ -424,15 +446,32 @@ function loseLife(){
     //gameOver
     //alert("dead");
     gwhLife.hide();
-    clearInterval(asteroid_interval);
-    clearInterval(clide);
+    
+    //clearInterval(asteroid_interval);
+    //clearInterval(clide);
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shield
     $('#shield-dual').remove();
-    
+    clearInterval(asteroid_interval);
+    clearInterval(clide);
+    //astIntervals.forEach(function(a){
+    //  clearInterval(a);
+    //});
     state = STATE.game_over;
     setTimeout(function(){
+      //clearInterval(asteroid_interval);
+      //$('.asteroid').remove();  // remove all asteroids
+      //$('.shield').remove(); // remove all the shield
+      //astIntervals.forEach(function(a){
+        //clearInterval(a);
+      //});
+      //$('.asteroid').remove();  // remove all asteroids
+      //$('.shield').remove(); // remove all the shield
+      //astIntervals.forEach(function(a){
+        //clearInterval(a);
+      //});
+      //$('.shield').remove(); // remove all the shield
       ship.hide();
       $('#ship-dual').remove();
       let score = "Your Score is: "+ gwhScore.html() + " points";
@@ -453,19 +492,26 @@ function loseLife(){
   }else{
     parameterOnUpdate.life -= 1;
     $('#health div:first').hide();
+    //clearInterval(asteroid_interval);
+    //astIntervals.forEach(function(a){
+     // clearInterval(a);
+    //});
+    
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
+    //$('.shield').remove(); // remove all the shield
     clearInterval(asteroid_interval);
     clearInterval(clide);
+
     setTimeout(function(){
       asteroid_interval = setInterval(function(){
-        //console.log("asteroid3");
+        console.log("asteroid3");
         createAsteroid();
       }, 1000/parameterOnUpdate.spawn);
-
+      astIntervals.push(asteroid_interval);
       clide = setInterval(function() {
         checkCollisions();  // Remove elements if there are collisions
-      }, 100);
+      }, 10);
 
     }, 1000);
     
@@ -634,7 +680,10 @@ function isColliding(o1, o2) {
           'top': parseInt(o2.css('top')),
           'bottom': parseInt(o2.css('top')) + o1.height()
         };
+  
+  if(isDual){
 
+  }
   // If horizontally overlapping...
   if ( (o1D.left < o2D.left && o1D.right > o2D.left) ||
        (o1D.left < o2D.right && o1D.right > o2D.right) ||
@@ -727,7 +776,7 @@ function createAsteroid() {
       //+ (parseInt($('#ship-primary').height()) / 2);
       if(isDual){
         
-        ship_left += parseInt(ship.width()) / 4;
+        ship_left += parseInt(ship.width()) / 8;
         //alert("yes");
         //ship_top += parseInt($('#ship-dual').height()) / 2;
       }
