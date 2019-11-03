@@ -127,7 +127,10 @@ $(document).ready( function() {
 });
 
 function keyupRouter(e){
-  e.preventDefault();
+  //if(status === STATE.running){
+  //e.preventDefault();
+  //}
+  
   
   switch (e.which) {
     //case KEYS.shift:
@@ -146,8 +149,11 @@ function keyupRouter(e){
 }
 
 function keydownRouter(e) {
-  e.preventDefault();
-  
+  //se.preventDefault();
+  //console.log(status === STATE.running);
+  if(state === STATE.running){
+    e.preventDefault();
+  }
   switch (e.which) {
     case KEYS.shift:
       if(state == STATE.running){
@@ -352,6 +358,8 @@ function loseLife(){
     setTimeout(function(){
       ship.hide();
       $('#ship-dual').remove();
+      let score = "Your Score is: "+ gwhScore.html() + " points";
+      $('#final-score').html(score);
       gwhOver.show();
     }, 1000);
     
