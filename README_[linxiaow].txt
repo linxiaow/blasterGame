@@ -60,8 +60,6 @@ Addition:
 
 3. add transition words and music
 
-4. Smoothen the movement of ship
+4. Disable move and fire at the same time by using preventDefault
 
-5. Disable move and fire at the same time
-
-6. cannot press L too quick. wait until the animation pass
+5. cannot press L too quick. wait until the animation pass. add a isTransition varibale
