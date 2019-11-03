@@ -198,7 +198,7 @@ function keydownRouter(e) {
     case KEYS.L:
       //level up
       gwhScore.html(level * 10000);
-      //alertLevel();
+      alertLevel();
       /*
       if(level < 3){
         //let curScore = parseInt(gwhScore.text())
@@ -342,9 +342,9 @@ function gameStart(e){
   gwhLevel.fadeOut(1500);
   //LEVEL.first = true;
 
-  levelCheck = setInterval(function(){
-    alertLevel();
-  }, 100);
+  //levelCheck = setInterval(function(){
+  //  alertLevel();
+  //}, 100);
 
   clide = setInterval(function() {
     checkCollisions();  // Remove elements if there are collisions
@@ -579,7 +579,7 @@ function checkCollisions() {
 
         // Update the visible score
         gwhScore.html(parseInt($('#score-box').html()) + points);
-        
+        alertLevel();
       }
     });
   });
