@@ -31,6 +31,7 @@ Functionality in the spec:
     7.2: transition source: https://freesound.org/people/soneproject/sounds/346425/
     7.3: background source: https://freesound.org/people/joshuaempyre/sounds/251461/
     in HTML, add audio tag
+8.score: level up too quick, in line 553, I give a proportion of 0.3
 
 Level 1:
 -getRandom to return a random number
@@ -38,6 +39,8 @@ Level 1:
 -add asteroid rotation in createAstoroid()
 -implement updateAcc to update rate whenever a hit or rocket out of the screen
 -add explosion effect in lose life
+-change the starting point at line 677 for not being too left
+-change the starting point in line 686
 
 Level 2:
 -Add createShield functionality

@@ -36,6 +36,7 @@ var hitNum;
 var shield_exist;
 var M;
 var isDual;
+var accuracy;
 
 var parameterOnUpdate = {
   //handle on update
@@ -102,6 +103,7 @@ $(document).ready( function() {
   gwhExplode = $('#explosion');
   level = 1;
   rotation = 0;
+  accuracy = 0;
   hitNum = 0;
   shield_exist = false;
   M = 10;
@@ -298,8 +300,9 @@ function goBack(e){
   gwhOver.hide();
   gwhSplash.show();
   ship.show();
-  gwhAcc.html('0%');
+  //accuracy = 0;
   state = STATE.initial; // go to splash screen
+  gwhAcc.html('0%');
   gwhExplode.css({'left': '4px', 'top' : '-7px', 'height': '50px'});
 
   //add music if not mute
@@ -325,15 +328,16 @@ function gameStart(e){
   $('#health div:first').show();
   parameterOnUpdate.life = 2;
   state = STATE.running;
-  asteroid_interval = 
-  setInterval(function(){
-    createAsteroid();
-  }, 1000/parameterOnUpdate.spawn);
   
-
   $('#level').html(1);
-  gwhLevel.fadeIn(1000);
-  gwhLevel.fadeOut(2000);
+  gwhLevel.fadeIn(1500);
+  setTimeout(function(){
+    asteroid_interval = 
+    setInterval(function(){
+      createAsteroid();
+    }, 1000/parameterOnUpdate.spawn);
+  }, 1500);
+  gwhLevel.fadeOut(1500);
   //LEVEL.first = true;
 
   levelCheck = setInterval(function(){
@@ -362,10 +366,20 @@ function alertLevel(){
     }
     
     level++;
+    $('.rocket').remove();  // remove all rockets
+    $('.asteroid').remove();  // remove all asteroids
+    $('.shield').remove(); // remove all the shiled
     const curLevel = level;
     $('#level').html(curLevel);
-    gwhLevel.fadeIn(1000);
-    gwhLevel.fadeOut(2000);
+    gwhLevel.fadeIn(1500);
+    clearInterval(asteroid_interval);
+    setTimeout(function(){
+      asteroid_interval = 
+      setInterval(function(){
+          createAsteroid();
+        }, 1000/parameterOnUpdate.spawn);
+    }, 1500);
+    gwhLevel.fadeOut(1500);
   }
 
   if(level === 3 && isDual === false){
@@ -383,9 +397,13 @@ function updateAcc(){
   //everytime a hit 
   //or a rocket go out of the screen
   //update accuracy
-  let accuracy = parseInt(hitNum * 100 / (rocketIdx - 1));
+  accuracy = parseInt(hitNum * 100 / (rocketIdx - 1));
   //update css
-  gwhAcc.html(accuracy + '%');
+  if(state = STATE.running){
+    //console.log("update");
+    gwhAcc.html(accuracy + '%');
+  }
+  
 }
 
 function loseLife(){
@@ -493,19 +511,21 @@ function createDual(){
     var shipDual = "<img class='ship-avatar' id='ship-dual' src='img/fighter.png' height='50px'/> <div id='shield-dual'><img src='img/shield.png' height='65px'/> </div>"
     // Add the rocket to the screen
     ship.append(shipDual);
-    //alert(ship.html());
+    //update max x
+    maxShipPosX = gwhGame.width() - ship.width() * 2;
+    isDual = true;
+
+    if(shield_exist){
+      //alert("yes");
+      $('#shield-dual').show();
+    }
+    //change css for explosion
+    gwhExplode.css({'left': '15px', 'top' : '-30px', 'height': '80px'});
+    
   }, 1000);
   
   ship.fadeIn(1000);
-  //update max x
-  maxShipPosX = gwhGame.width() - ship.width() * 2;
-  isDual = true;
-
-  if(shield_exist){
-    $('#shield-dual').show();
-  }
-  //change css for explosion
-  gwhExplode.css({'left': '15px', 'top' : '-30px', 'height': '80px'});
+  
 }
 
 //END OF TODO
@@ -526,7 +546,7 @@ function checkCollisions() {
       if (isColliding(curRocket,curAsteroid)) {
         // If a rocket and asteroid collide, destroy both
         //explosion(curRocket,curAsteroid);
-        
+        //console.log("a hit!");
         curRocket.remove();
         curAsteroid.remove();
 
@@ -543,7 +563,8 @@ function checkCollisions() {
         //END
         updateAcc();
         // Score points for hitting an asteroid! Smaller asteroid --> higher score
-        var points = Math.ceil(MAX_ASTEROID_SIZE-curAsteroid.width()) * SCORE_UNIT;
+        var points = Math.ceil((MAX_ASTEROID_SIZE-curAsteroid.width()) * SCORE_UNIT * 0.3);
+        // give less score
 
         if (fastAsteroid.indexOf(curAsteroid.attr('id')) > -1) {
           //faster asteroid get higher score
@@ -653,7 +674,7 @@ function createAsteroid() {
   **       allows us to adjust position more appropriately.
   **/
   // Pick a random starting position within the game window
-  var startingPosition = Math.random() * (gwhGame.width()-astrSize);  // Using 50px as the size of the asteroid (since no instance exists yet)
+  var startingPosition = Math.random() * (gwhGame.width()-astrSize - 10) + 10;  // Using 50px as the size of the asteroid (since no instance exists yet)
   
   let asteroid_speed = {
     sum_speed : ASTEROID_SPEED,
@@ -662,7 +683,7 @@ function createAsteroid() {
   }
   // Set the instance-specific properties
   curAsteroid.css('left', startingPosition+"px");
-
+  curAsteroid.css('top', "10px");
   //TODO: make faster asteroid
     //let asteroid_ = ASTEROID_SPEED;
     //let speed = ASTEROID_SPEED;
@@ -819,12 +840,13 @@ function fireRocket() {
     rocketMusic.play();
   }
   // Create movement update handler
-  setInterval( function() {
+  var rocketShoot = setInterval( function() {
     curRocket_1.css('top', parseInt(curRocket_1.css('top'))-ROCKET_SPEED);
     // Check to see if the rocket has left the game/viewing window
     if (parseInt(curRocket_1.css('top')) < curRocket_1.height()) {
       //curRocket.hide();
       //problem: 还是有问题
+      clearInterval(rocketShoot);
       updateAcc();
       curRocket_1.remove();
     }
@@ -844,12 +866,13 @@ function fireRocket() {
     curRocket_2.css('left', rxPos_2+"px");
   
     // Create movement update handler
-    setInterval( function() {
+    var rocketShoot_2 = setInterval( function() {
       curRocket_2.css('top', parseInt(curRocket_2.css('top'))-ROCKET_SPEED);
       // Check to see if the rocket has left the game/viewing window
       if (parseInt(curRocket_2.css('top')) < curRocket_2.height()) {
         //curRocket.hide();
         //problem: 还是有问题
+        clearInterval(rocketShoot_2);
         updateAcc();
         curRocket_2.remove();
       }
