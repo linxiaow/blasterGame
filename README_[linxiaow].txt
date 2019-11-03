@@ -51,9 +51,11 @@ Level 2:
 Level 3:
 - in createAsteroid, a fast asteroid aims at the spaceship
 - add dual ship when enter level 3. fade in fade out
-- use a setInterval to smoothen the movement
+
 
 Addition:
 1. add health property. Show heart in the right top corner to indicates 2 points of health. Picture source: https://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d
 
-2. 
+2. use a setInterval to smoothen the movement
+
+3. add transition words and music

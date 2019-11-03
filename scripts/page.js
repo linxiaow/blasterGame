@@ -334,7 +334,6 @@ function gameStart(e){
   setTimeout(function(){
     asteroid_interval = 
     setInterval(function(){
-      createAsteroid();
     }, 1000/parameterOnUpdate.spawn);
   }, 1500);
   gwhLevel.fadeOut(1500);
@@ -346,7 +345,7 @@ function gameStart(e){
 
   clide = setInterval(function() {
     checkCollisions();  // Remove elements if there are collisions
-  }, 100);
+  }, 50);
 
   //smooth move
   
