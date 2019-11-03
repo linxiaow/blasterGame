@@ -200,8 +200,12 @@ function keydownRouter(e) {
       break;
     case KEYS.L:
       //level up
-      gwhScore.html(level * 10000);
-      alertLevel();
+      if(!isTransition){
+        //isTransition = true;
+        gwhScore.html(level * 10000);
+        alertLevel();
+      }
+      
       /*
       if(level < 3){
         //let curScore = parseInt(gwhScore.text())
