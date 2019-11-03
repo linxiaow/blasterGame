@@ -332,8 +332,11 @@ function gameStart(e){
   $('#level').html(1);
   gwhLevel.fadeIn(1500);
   setTimeout(function(){
+    //console.log("shoot");
     asteroid_interval = 
     setInterval(function(){
+      //console.log("asteroid2");
+      createAsteroid();
     }, 1000/parameterOnUpdate.spawn);
   }, 1500);
   gwhLevel.fadeOut(1500);
@@ -363,8 +366,8 @@ function alertLevel(){
       }
       transMusic.play();
     }
-    
     level++;
+    //alert(level);
     $('.rocket').remove();  // remove all rockets
     $('.asteroid').remove();  // remove all asteroids
     $('.shield').remove(); // remove all the shiled
@@ -375,6 +378,7 @@ function alertLevel(){
     setTimeout(function(){
       asteroid_interval = 
       setInterval(function(){
+          console.log("asteroid");
           createAsteroid();
         }, 1000/parameterOnUpdate.spawn);
     }, 1500);
@@ -418,16 +422,15 @@ function loseLife(){
   }
   if(parameterOnUpdate.life <= 1){
     //gameOver
-    
+    //alert("dead");
     gwhLife.hide();
-    
-    $('.rocket').remove();  // remove all rockets
-    $('.asteroid').remove();  // remove all asteroids
-    $('.shield').remove(); // remove all the shiled
-    
-    $('#shield-dual').remove();
     clearInterval(asteroid_interval);
     clearInterval(clide);
+    $('.rocket').remove();  // remove all rockets
+    $('.asteroid').remove();  // remove all asteroids
+    $('.shield').remove(); // remove all the shield
+    $('#shield-dual').remove();
+    
     state = STATE.game_over;
     setTimeout(function(){
       ship.hide();
@@ -456,6 +459,7 @@ function loseLife(){
     clearInterval(clide);
     setTimeout(function(){
       asteroid_interval = setInterval(function(){
+        //console.log("asteroid3");
         createAsteroid();
       }, 1000/parameterOnUpdate.spawn);
 
@@ -505,14 +509,17 @@ function setShield(isWear, item){
 
 function createDual(){
   ship.fadeOut(1000);
+  isDual = true;
+  maxShipPosX = gwhGame.width() - ship.width() * 2;
+
+
   setTimeout(function(){
     ship.css({'top' : '530px', 'left' : '92px'});
     var shipDual = "<img class='ship-avatar' id='ship-dual' src='img/fighter.png' height='50px'/> <div id='shield-dual'><img src='img/shield.png' height='65px'/> </div>"
     // Add the rocket to the screen
     ship.append(shipDual);
     //update max x
-    maxShipPosX = gwhGame.width() - ship.width() * 2;
-    isDual = true;
+    
 
     if(shield_exist){
       //alert("yes");
