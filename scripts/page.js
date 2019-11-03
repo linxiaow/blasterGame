@@ -6,7 +6,8 @@ var asteroidIdx = 1;
 var fastAsteroid = [];
 var shieldIdx = 1;
 
-var isKeyUp = true;
+/*var isKeyUp = true;*/
+
 var curMove = 0;
 
 // Size Constants
@@ -23,6 +24,8 @@ var maxShipPosX, maxShipPosY;
 
 // Global Window Handles (gwh__)
 var gwhGame, gwhOver, gwhStatus, gwhScore, gwhAcc, gwhLife, gwhSplash, gwhLevel, gwhShield, gwhExplode;
+
+var introMusic, overMusic, explodeMusic, transMusic, backMusic, rocketMusic;
 
 // Global Object Handles
 var ship;
@@ -76,7 +79,13 @@ var LEVEL = {
 // Main
 $(document).ready( function() {
   console.log("Ready!");
-
+  introMusic = $('audio#intro')[0];
+  overMusic =  $('audio#over')[0];
+  explodeMusic = $('audio#explode')[0];
+  transMusic = $('audio#transition')[0];
+  backMusic = $('audio#background')[0];
+  rocketMusic = $('audio#rocket')[0];
+  //$('audio#intro')[0].play();
   // Set global handles (now that the page is loaded)
   gwhGame = $('.game-window');
   gwhOver = $('.game-over');
@@ -97,6 +106,7 @@ $(document).ready( function() {
   shield_exist = false;
   M = 10;
   isDual = false;
+  SHIP_SPEED = 1; //change ship speed
   //END OF TODO
 
   // Set global positions
@@ -123,15 +133,25 @@ $(document).ready( function() {
   
   // Periodically check for collisions (instead of checking every position-update)
   //console.log(parameterOnUpdate.spawn);
+  setInterval(function() {
+    moveShip(curMove);
+    /*
+    if(!isKeyUp){
+      //still press
+      moveShip(curMove);
+    }*/
+     // Remove elements if there are collisions
+  }, 1);
   
+  //introMusic.play();
 });
 
 function keyupRouter(e){
   //if(status === STATE.running){
   //e.preventDefault();
   //}
-  
-  
+  curMove = 0;
+  /*
   switch (e.which) {
     //case KEYS.shift:
     //case KEYS.spacebar:
@@ -144,7 +164,7 @@ function keyupRouter(e){
       break;
     default:
       console.log("Other Keyup!");
-  }
+  }*/
   
 }
 
@@ -169,7 +189,7 @@ function keydownRouter(e) {
     case KEYS.right:
     case KEYS.up:
     case KEYS.down:
-      isKeyUp = false;
+      //isKeyUp = false;
       curMove = e.which;
       //moveShip(e.which);
       break;
@@ -237,6 +257,25 @@ function updatePanel(e){
   //alert(parameterOnUpdate.isMute);
   $('#set-panel').html("Open Setting Panel");
   $(this).hide();
+
+  if(parameterOnUpdate.isMute){
+    //pause all the music
+    $('audio').each(function(){
+      this.pause();
+      this.currentTime = 0;
+    });
+   /* introMusic.pause();
+    console.log(introMusic.currentTime);
+    //set to beginning
+    introMusic.currentTime = 0;*/
+  }else{
+    if(state === STATE.initial){
+      //if it is initial, should play immediatele
+      introMusic.play();
+    }else if(state === STATE.running){
+      backMusic.play();
+    }
+  }
 }
 
 function goBack(e){
@@ -261,7 +300,12 @@ function goBack(e){
   ship.show();
   gwhAcc.html('0%');
   state = STATE.initial; // go to splash screen
-  gwhExplode.css({'left': '4px', 'top' : '-7px', 'height': '50pxs'});
+  gwhExplode.css({'left': '4px', 'top' : '-7px', 'height': '50px'});
+
+  //add music if not mute
+  if(!parameterOnUpdate.isMute){
+    introMusic.play();
+  }
   //LEVEL.first = false;
   //LEVEL.second = false;
   //LEVEL.third = false;
@@ -270,8 +314,12 @@ function goBack(e){
 function gameStart(e){
   //TODO: game start
   console.log(parameterOnUpdate.spawn);
-  SHIP_SPEED = 1; //change ship speed
-
+  //mute intogame
+  introMusic.pause();
+  introMusic.currentTime = 0;
+  if(!parameterOnUpdate.isMute){
+    backMusic.play();
+  }
   gwhSplash.hide();
   gwhLife.show();
   $('#health div:first').show();
@@ -297,13 +345,7 @@ function gameStart(e){
   }, 100);
 
   //smooth move
-  setInterval(function() {
-    if(!isKeyUp){
-      //still press
-      moveShip(curMove);
-    }
-     // Remove elements if there are collisions
-  }, 1);
+  
 
 }
 
@@ -312,6 +354,13 @@ function alertLevel(){
     //alert("enter");
     //LEVEL[Object.keys(LEVEL)[level]] = true;
     //alert("here");
+    if(!parameterOnUpdate.isMute){
+      if(!transMusic.paused){
+        transMusic.pause();
+      }
+      transMusic.play();
+    }
+    
     level++;
     const curLevel = level;
     $('#level').html(curLevel);
@@ -343,8 +392,16 @@ function loseLife(){
   //const curLife = parseInt(parameterOnUpdate.life);
   //console.log(parameterOnUpdate.life);
   gwhExplode.fadeIn(500);
+  if(!parameterOnUpdate.isMute){
+    if(!explodeMusic.paused){
+      explodeMusic.pause();
+      explodeMusic.currentTime = 0;
+    }
+    explodeMusic.play();
+  }
   if(parameterOnUpdate.life <= 1){
     //gameOver
+    
     gwhLife.hide();
     
     $('.rocket').remove();  // remove all rockets
@@ -361,6 +418,16 @@ function loseLife(){
       let score = "Your Score is: "+ gwhScore.html() + " points";
       $('#final-score').html(score);
       gwhOver.show();
+
+      //pause all the music
+      $('audio').each(function(){
+        this.pause();
+        this.currentTime = 0;
+      });
+
+      if(!parameterOnUpdate.isMute){
+        overMusic.play();
+      }
     }, 1000);
     
   }else{
@@ -379,7 +446,7 @@ function loseLife(){
         checkCollisions();  // Remove elements if there are collisions
       }, 100);
 
-    }, 500);
+    }, 1000);
     
     
     //setShield(false, curAsteroid);
@@ -748,7 +815,9 @@ function fireRocket() {
 
   curRocket_1.css('top', ship.css('top'));
   curRocket_1.css('left', rxPos_1+"px");
-
+  if(!parameterOnUpdate.isMute){
+    rocketMusic.play();
+  }
   // Create movement update handler
   setInterval( function() {
     curRocket_1.css('top', parseInt(curRocket_1.css('top'))-ROCKET_SPEED);
@@ -791,6 +860,7 @@ function fireRocket() {
 
 // Handle ship movement events
 function moveShip(arrow) {
+  //console.log(arrow);
   switch (arrow) {
     case KEYS.left:  // left arrow
       var newPos = parseInt(ship.css('left'))-SHIP_SPEED;

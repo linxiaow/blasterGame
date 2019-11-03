@@ -26,6 +26,11 @@ Functionality in the spec:
 4: "trap door" which is KEY.L. Use a setInterval(line 291) to check level up. #alertLevel()# to update level
 5: add #state# varible to record the state
 6: game over: add Game over display in HTML. default set to non-display. show in function #loseLife# when there is no more life.
+7.audio:
+    7.1: Sounds are defaulted to be muted
+    7.2: transition source: https://freesound.org/people/soneproject/sounds/346425/
+    7.3: background source: https://freesound.org/people/joshuaempyre/sounds/251461/
+    in HTML, add audio tag
 
 Level 1:
 -getRandom to return a random number
