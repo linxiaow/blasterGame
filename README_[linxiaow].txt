@@ -39,6 +39,10 @@ Level 1:
 -add asteroid rotation in createAstoroid()
 -implement updateAcc to update rate whenever a hit or rocket out of the screen
 -add explosion effect in lose life
+
+-Implement Game over window 
+	**THERE IS INCONSISTANCY IN CAEN AND MY COMPUTER. My content in the center in CAEN by clip to the right in my computer. I comprimise to CAEN and hope you can see the same content in your computer**
+
 -change the starting point at line 677 for not being too left
 -change the starting point in line 686
 
