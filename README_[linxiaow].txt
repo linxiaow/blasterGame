@@ -16,13 +16,16 @@ following functionality:
 Arrow-Keys: move ship
 Spacebar: fire rocket
 Shift: spawn one additional asteroid
+L: Manually create Asteroid
 
 Functionality in the spec:
-- Accuracy
-- setPanel to open control pannel
-- updatePanel to update parameter to a global value. check if the input is valid
-- "trap door" which is KEY.L
-- add state to record the state
+- General Requirement:
+1: Accuracy: by changing #gwhAcc# varible by function #updateAcc()#
+2: Setting panel: register callback function #setPanal()# in status windows (gwhStatus)
+3: UPDTATE key: register a onSubmit callback #updatePanel(e)# to update parameter to variable #parameterOn  Update#. preventDefault to prevent refresh. check if the input is valid.
+4: "trap door" which is KEY.L. Use a setInterval(line 291) to check level up. #alertLevel()# to update level
+5: add #state# varible to record the state
+6: game over: add Game over display in HTML. default set to non-display. show in function #loseLife# when there is no more life.
 
 Level 1:
 -getRandom to return a random number
@@ -42,3 +45,7 @@ Level 3:
 - add dual ship when enter level 3. fade in fade out
 - use a setInterval to smoothen the movement
 
+Addition:
+1. add health property. Show heart in the right top corner to indicates 2 points of health. Picture source: https://image.baidu.com/search/detail?ct=503316480&z=0&ipn=d
+
+2. 
